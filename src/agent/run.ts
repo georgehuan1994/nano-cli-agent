@@ -6,15 +6,30 @@ import { SYSTEM_PROMPT } from "./system/prompt.js";
 import { tools } from "./tools/index.js";
 
 interface IRunOptions {
+	/** 每当模型生成新的文本时的回调 */
 	onToken: (text: string) => void;
+	/** 中止信号，用于取消模型请求 */
 	abortSignal?: AbortSignal;
 }
 
 export interface IRunResult {
+	/** 模型生成的文本 */
 	text: string;
+	/** token 用量 */
 	usage: ITokenUsageInfo;
 }
 
+/**
+ * 运行 Agent 并返回模型生成的文本及 token 使用情况
+ *
+ * @param config OpenAI 配置
+ * @param messages 模型的输入消息
+ * @param onToken 每当模型生成新的文本时的回调
+ * @param abortSignal 中止信号，用于取消模型请求
+ *
+ * @returns 模型生成的文本及 token 使用情况
+ * @throws 当模型请求失败或被取消时抛出错误
+ */
 export async function runAgent(
 	config: IOpenAIConfig,
 	messages: ModelMessage[],
@@ -24,7 +39,7 @@ export async function runAgent(
 
 	try {
 		const result: StreamTextResult<typeof tools, never> = streamText({
-			model: openai.chat(config.model),
+			model: openai.chat(config.modelName),
 			system: SYSTEM_PROMPT,
 			messages,
 			tools,

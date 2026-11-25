@@ -34,7 +34,7 @@ export function readOpenAIConfig(env: NodeJS.ProcessEnv): IOpenAIConfig {
 	return {
 		baseURL: `${endpoint.origin}${path}`,
 		apiKey,
-		model: requireEnv(env, "OPENAI_MODEL"),
+		modelName: requireEnv(env, "OPENAI_MODEL"),
 		contextWindow: parseContextWindow(contextWindow),
 	};
 }

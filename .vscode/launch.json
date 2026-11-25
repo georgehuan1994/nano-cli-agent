@@ -1,0 +1,18 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "调试 Nano CLI Agent",
+			"type": "node",
+			"request": "launch",
+			"runtimeExecutable": "node",
+			"runtimeArgs": ["--import", "tsx"],
+			"program": "${workspaceFolder}/src/index.ts",
+			"cwd": "${workspaceFolder}",
+			"console": "integratedTerminal",
+			"internalConsoleOptions": "neverOpen",
+			"sourceMaps": true,
+			"skipFiles": ["<node_internals>/**"]
+		}
+	]
+}

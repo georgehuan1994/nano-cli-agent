@@ -73,7 +73,7 @@ export function App({ config }: { config: IOpenAIConfig }): ReactElement {
 
 	return (
 		<Box flexDirection="column">
-			<MessageList model={config.model} messages={messages} />
+			<MessageList model={config.modelName} messages={messages} />
 			{streamingText !== undefined && streamingText !== "" && (
 				<MessageView message={{ role: "assistant", content: streamingText }} />
 			)}
