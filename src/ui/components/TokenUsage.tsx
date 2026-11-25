@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 
 import type { ITokenUsageInfo } from "../../types.js";
 
-const number = new Intl.NumberFormat("zh-CN");
+const number: Intl.NumberFormat = new Intl.NumberFormat("zh-CN");
 
 export function TokenUsage({
 	usage,
@@ -16,8 +16,8 @@ export function TokenUsage({
 		return undefined;
 	}
 
-	const { inputTokens, outputTokens, totalTokens } = usage;
-	const counts = [
+	const { inputTokens, outputTokens, totalTokens }: ITokenUsageInfo = usage;
+	const counts: string[] = [
 		inputTokens === undefined ? "" : `输入 ${number.format(inputTokens)}`,
 		outputTokens === undefined ? "" : `输出 ${number.format(outputTokens)}`,
 		totalTokens === undefined ? "" : `合计 ${number.format(totalTokens)}`,

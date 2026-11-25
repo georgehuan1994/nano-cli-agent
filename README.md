@@ -32,6 +32,8 @@ ESLint 检查 120 列的行宽限制。Biome 在这个宽度内尽量保持单�
 
 类型检查禁止显式 `any`，并检查从依赖中流入的 `any` 是否被安全处理。若确实需要对不兼容的类型做双重断言，中间类型必须为 `unknown`，例如 `value as unknown as TResult`。类型和命名问题由开发者修正。 [TypeScript 类型断言](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-assertions)
 
+`const` 声明必须显式标注类型，包括解构声明。`for...of`、`for await...of` 和 `for...in` 的循环头按 TypeScript 语法从遍历对象推导绑定类型。 [TypeScript 编译器诊断](https://raw.githubusercontent.com/microsoft/TypeScript/v5.9.3/src/compiler/diagnosticMessages.json)
+
 `switch` 必须为联合类型的每个字面量和枚举的每个成员写出 `case`，禁止使用 `default`。行为相同的 `case` 可以共用一个分支体。 [typescript-eslint 穷尽检查](https://typescript-eslint.io/rules/switch-exhaustiveness-check/)
 
 控制语句的分支体必须用花括号包裹并另起一行，即使只有单条 `return`、`break` 或 `continue`。例如，`if (!usage) return undefined;` 必须展开为多行块。`pnpm lint:fix` 会补齐花括号，Biome 会整理缩进。 [ESLint curly 规则](https://eslint.org/docs/latest/rules/curly)

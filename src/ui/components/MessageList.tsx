@@ -9,14 +9,19 @@ export interface IMessage {
 	content: string;
 }
 
-const labels = {
+interface IMessageLabel {
+	readonly title: string;
+	readonly color: string;
+}
+
+const labels: Readonly<Record<IMessage["role"], IMessageLabel>> = {
 	user: { title: "你", color: "cyan" },
 	assistant: { title: "助手", color: "green" },
 	error: { title: "请求失败", color: "red" },
-} as const;
+};
 
 export function MessageView({ message: { role, content } }: { message: Omit<IMessage, "id"> }): ReactElement {
-	const { color, title } = labels[role];
+	const { color, title }: IMessageLabel = labels[role];
 	return (
 		<Box flexDirection="column" marginBottom={1}>
 			<Text bold color={color}>

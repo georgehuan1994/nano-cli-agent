@@ -1,18 +1,25 @@
 import { Box, Text, useInput } from "ink";
-import { type ReactElement, useRef, useState } from "react";
+import { type ReactElement, type RefObject, useRef, useState } from "react";
+
+import type { TState } from "../types.js";
 
 interface IInputProps {
 	onSubmit: (value: string) => void;
 	disabled: boolean;
 }
 
-const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
-const emptyDraft = { value: "", cursor: 0 };
+interface IInputDraft {
+	value: string;
+	cursor: number;
+}
+
+const segmenter: Intl.Segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+const emptyDraft: IInputDraft = { value: "", cursor: 0 };
 
 export function Input({ onSubmit, disabled }: IInputProps): ReactElement | undefined {
-	const [draft, setDraft] = useState(emptyDraft);
+	const [draft, setDraft]: TState<IInputDraft> = useState(emptyDraft);
 	// Terminal input events can arrive before React commits the updated draft.
-	const latestDraft = useRef(draft);
+	const latestDraft: RefObject<IInputDraft> = useRef(draft);
 
 	function update(value: string, cursor: number): void {
 		latestDraft.current = { value, cursor };
@@ -24,7 +31,7 @@ export function Input({ onSubmit, disabled }: IInputProps): ReactElement | undef
 			return;
 		}
 
-		const { value, cursor } = latestDraft.current;
+		const { value, cursor }: IInputDraft = latestDraft.current;
 		if (key.return || input === "\n") {
 			if (value.trim() !== "") {
 				update("", 0);
@@ -34,9 +41,9 @@ export function Input({ onSubmit, disabled }: IInputProps): ReactElement | undef
 			return;
 		}
 
-		const segments = segmenter.segment(value);
-		const previous = segments.containing(cursor - 1)?.index ?? 0;
-		const next = cursor + (segments.containing(cursor)?.segment.length ?? 0);
+		const segments: Intl.Segments = segmenter.segment(value);
+		const previous: number = segments.containing(cursor - 1)?.index ?? 0;
+		const next: number = cursor + (segments.containing(cursor)?.segment.length ?? 0);
 
 		if (key.leftArrow) {
 			update(value, previous);
@@ -52,11 +59,11 @@ export function Input({ onSubmit, disabled }: IInputProps): ReactElement | undef
 			// Ink 6 reports Backspace as Delete in terminals that send DEL.
 			update(value.slice(0, previous) + value.slice(cursor), previous);
 		} else if (input !== "" && !key.ctrl && !key.meta && !key.tab) {
-			const text = input.replace(/\r\n?/g, "\n");
-			const updated = value.slice(0, cursor) + text + value.slice(cursor);
-			const insertionEnd = cursor + text.length;
-			const following = segmenter.segment(updated).containing(insertionEnd);
-			const newCursor =
+			const text: string = input.replace(/\r\n?/g, "\n");
+			const updated: string = value.slice(0, cursor) + text + value.slice(cursor);
+			const insertionEnd: number = cursor + text.length;
+			const following: Intl.SegmentData | undefined = segmenter.segment(updated).containing(insertionEnd);
+			const newCursor: number =
 				following && following.index < insertionEnd ? following.index + following.segment.length : insertionEnd;
 			update(updated, newCursor);
 		}
@@ -66,8 +73,8 @@ export function Input({ onSubmit, disabled }: IInputProps): ReactElement | undef
 		return undefined;
 	}
 
-	const { value, cursor } = draft;
-	const current = segmenter.segment(value).containing(cursor)?.segment ?? "";
+	const { value, cursor }: IInputDraft = draft;
+	const current: string = segmenter.segment(value).containing(cursor)?.segment ?? "";
 	return (
 		<Box gap={1}>
 			<Text bold color="cyan">

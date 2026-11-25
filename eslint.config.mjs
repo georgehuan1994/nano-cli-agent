@@ -183,9 +183,15 @@ export default defineConfig([
 			"@typescript-eslint/switch-exhaustiveness-check": ["error", { considerDefaultExhaustiveForUnions: false }],
 			/** 要求普通函数以小写字母开头，React 组件可以使用 PascalCase。 */
 			"project/function-name": "error",
-			/** 用语法选择器补充 switch、类型断言、空值和类字段的限制。 */
+			/** 用语法选择器补充控制流、类型标注、空值和类字段的限制。 */
 			"no-restricted-syntax": [
 				"error",
+				/** 要求 const 显式标注类型，遍历循环头由 TypeScript 推导绑定类型。 */
+				{
+					selector:
+						"VariableDeclaration[kind='const']:not(:matches(ForOfStatement, ForInStatement) > VariableDeclaration.left) > VariableDeclarator:not([id.typeAnnotation])",
+					message: "Declare the type of this const binding explicitly.",
+				},
 				/** 禁止 switch 使用 default。 */
 				{ selector: "SwitchCase[test=null]", message: "List each switch case explicitly instead of using default." },
 				/** 要求双重类型断言以 unknown 为中间类型。 */

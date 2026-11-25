@@ -1,5 +1,5 @@
-import { createOpenAI } from "@ai-sdk/openai";
-import { APICallError, type ModelMessage, streamText } from "ai";
+import { createOpenAI, type OpenAIProvider } from "@ai-sdk/openai";
+import { APICallError, type LanguageModelUsage, type ModelMessage, streamText, type StreamTextResult } from "ai";
 
 import type { IOpenAIConfig, ITokenUsageInfo } from "../types.js";
 import { SYSTEM_PROMPT } from "./system/prompt.js";
@@ -10,15 +10,20 @@ interface IRunOptions {
 	abortSignal?: AbortSignal;
 }
 
+export interface IRunResult {
+	text: string;
+	usage: ITokenUsageInfo;
+}
+
 export async function runAgent(
 	config: IOpenAIConfig,
 	messages: ModelMessage[],
 	{ onToken, abortSignal }: IRunOptions,
-): Promise<{ text: string; usage: ITokenUsageInfo }> {
-	const openai = createOpenAI({ baseURL: config.baseURL, apiKey: config.apiKey });
+): Promise<IRunResult> {
+	const openai: OpenAIProvider = createOpenAI({ baseURL: config.baseURL, apiKey: config.apiKey });
 
 	try {
-		const result = streamText({
+		const result: StreamTextResult<typeof tools, never> = streamText({
 			model: openai.chat(config.model),
 			system: SYSTEM_PROMPT,
 			messages,
@@ -59,7 +64,7 @@ export async function runAgent(
 			}
 		}
 
-		const [text, usage] = await Promise.all([result.text, result.usage]);
+		const [text, usage]: [string, LanguageModelUsage] = await Promise.all([result.text, result.usage]);
 		if (text.trim() !== "") {
 			return { text, usage };
 		}
@@ -68,7 +73,7 @@ export async function runAgent(
 			throw new Error("模型请求已取消。", { cause: error });
 		}
 
-		const statusCode = APICallError.isInstance(error) ? error.statusCode : undefined;
+		const statusCode: number | undefined = APICallError.isInstance(error) ? error.statusCode : undefined;
 		if (statusCode !== undefined && statusCode > 0) {
 			throw new Error(`网关请求失败（HTTP ${String(statusCode)}）。`, { cause: error });
 		}

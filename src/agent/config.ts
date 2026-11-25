@@ -2,7 +2,7 @@ import type { IOpenAIConfig } from "../types.js";
 import { parseContextWindow } from "./context/modelLimits.js";
 
 function requireEnv(env: NodeJS.ProcessEnv, name: string): string {
-	const value = env[name]?.trim() ?? "";
+	const value: string = env[name]?.trim() ?? "";
 	if (value === "") {
 		throw new Error(`请在 .env 中配置 ${name}。`);
 	}
@@ -11,7 +11,7 @@ function requireEnv(env: NodeJS.ProcessEnv, name: string): string {
 }
 
 export function readOpenAIConfig(env: NodeJS.ProcessEnv): IOpenAIConfig {
-	const endpoint = URL.parse(requireEnv(env, "OPENAI_BASE_URL"));
+	const endpoint: URL | undefined = URL.parse(requireEnv(env, "OPENAI_BASE_URL")) ?? undefined;
 	if (
 		!endpoint ||
 		!["http:", "https:"].includes(endpoint.protocol) ||
@@ -24,13 +24,13 @@ export function readOpenAIConfig(env: NodeJS.ProcessEnv): IOpenAIConfig {
 	}
 
 	// VS Code stores the full endpoint. The SDK appends /chat/completions.
-	const path = endpoint.pathname.replace(/\/+$/, "").replace(/\/chat\/completions$/, "");
-	const apiKey = requireEnv(env, "OPENAI_API_KEY");
+	const path: string = endpoint.pathname.replace(/\/+$/, "").replace(/\/chat\/completions$/, "");
+	const apiKey: string = requireEnv(env, "OPENAI_API_KEY");
 	if (/^\$\{input:[^}]+\}$/.test(apiKey)) {
 		throw new Error("OPENAI_API_KEY 中请填写网关发放的实际密钥。");
 	}
 
-	const { OPENAI_CONTEXT_WINDOW: contextWindow } = env;
+	const { OPENAI_CONTEXT_WINDOW: contextWindow }: NodeJS.ProcessEnv = env;
 	return {
 		baseURL: `${endpoint.origin}${path}`,
 		apiKey,
