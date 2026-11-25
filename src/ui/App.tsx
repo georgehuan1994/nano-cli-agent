@@ -28,7 +28,9 @@ export function App({ config }: { config: IOpenAIConfig }): ReactElement {
 	}
 
 	async function submit(prompt: string): Promise<void> {
-		if (activeRequest.current) return;
+		if (activeRequest.current) {
+			return;
+		}
 
 		const command = prompt.trim().toLowerCase();
 		if (command === "exit" || command === "quit") {
@@ -49,7 +51,9 @@ export function App({ config }: { config: IOpenAIConfig }): ReactElement {
 				},
 				abortSignal: controller.signal,
 			});
-			if (controller.signal.aborted) return;
+			if (controller.signal.aborted) {
+				return;
+			}
 
 			history.current = [...nextHistory, { role: "assistant", content: result.text }];
 			appendMessage("assistant", result.text);
@@ -60,14 +64,18 @@ export function App({ config }: { config: IOpenAIConfig }): ReactElement {
 			}
 		} finally {
 			activeRequest.current = undefined;
-			if (!controller.signal.aborted) setStreamingText(undefined);
+			if (!controller.signal.aborted) {
+				setStreamingText(undefined);
+			}
 		}
 	}
 
 	return (
 		<Box flexDirection="column">
 			<MessageList model={config.model} messages={messages} />
-			{streamingText && <MessageView message={{ role: "assistant", content: streamingText }} />}
+			{streamingText !== undefined && streamingText !== "" && (
+				<MessageView message={{ role: "assistant", content: streamingText }} />
+			)}
 			{streamingText === "" && <Spinner />}
 			<Input
 				onSubmit={(prompt): void => {

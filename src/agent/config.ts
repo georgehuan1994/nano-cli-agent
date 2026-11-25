@@ -2,10 +2,11 @@ import type { IOpenAIConfig } from "../types.js";
 import { parseContextWindow } from "./context/modelLimits.js";
 
 function requireEnv(env: NodeJS.ProcessEnv, name: string): string {
-	const value = env[name]?.trim();
-	if (!value) {
+	const value = env[name]?.trim() ?? "";
+	if (value === "") {
 		throw new Error(`请在 .env 中配置 ${name}。`);
 	}
+
 	return value;
 }
 
@@ -14,10 +15,10 @@ export function readOpenAIConfig(env: NodeJS.ProcessEnv): IOpenAIConfig {
 	if (
 		!endpoint ||
 		!["http:", "https:"].includes(endpoint.protocol) ||
-		endpoint.username ||
-		endpoint.password ||
-		endpoint.search ||
-		endpoint.hash
+		endpoint.username !== "" ||
+		endpoint.password !== "" ||
+		endpoint.search !== "" ||
+		endpoint.hash !== ""
 	) {
 		throw new Error("OPENAI_BASE_URL 必须是有效的 HTTP(S) 网关地址，且不能包含用户凭据、查询参数或片段。");
 	}
@@ -29,10 +30,11 @@ export function readOpenAIConfig(env: NodeJS.ProcessEnv): IOpenAIConfig {
 		throw new Error("OPENAI_API_KEY 中请填写网关发放的实际密钥。");
 	}
 
+	const { OPENAI_CONTEXT_WINDOW: contextWindow } = env;
 	return {
 		baseURL: `${endpoint.origin}${path}`,
 		apiKey,
 		model: requireEnv(env, "OPENAI_MODEL"),
-		contextWindow: parseContextWindow(env.OPENAI_CONTEXT_WINDOW),
+		contextWindow: parseContextWindow(contextWindow),
 	};
 }

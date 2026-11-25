@@ -2,7 +2,7 @@ export interface IOpenAIConfig {
 	baseURL: string;
 	apiKey: string;
 	model: string;
-	contextWindow?: number;
+	contextWindow?: number | undefined;
 }
 
 export interface ITokenUsageInfo {

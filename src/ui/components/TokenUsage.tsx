@@ -12,7 +12,9 @@ export function TokenUsage({
 	usage: ITokenUsageInfo | undefined;
 	contextWindow: number | undefined;
 }): ReactElement | undefined {
-	if (!usage) return undefined;
+	if (!usage) {
+		return undefined;
+	}
 
 	const { inputTokens, outputTokens, totalTokens } = usage;
 	const counts = [
@@ -21,7 +23,9 @@ export function TokenUsage({
 		totalTokens === undefined ? "" : `合计 ${number.format(totalTokens)}`,
 		contextWindow === undefined ? "" : `上下文窗口 ${number.format(contextWindow)}`,
 	].filter(Boolean);
-	if (!counts.length) return undefined;
+	if (counts.length === 0) {
+		return undefined;
+	}
 
 	return <Text dimColor>Token · {counts.join(" · ")}</Text>;
 }

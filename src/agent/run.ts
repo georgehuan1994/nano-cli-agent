@@ -23,7 +23,7 @@ export async function runAgent(
 			system: SYSTEM_PROMPT,
 			messages,
 			tools,
-			abortSignal,
+			...(abortSignal === undefined ? {} : { abortSignal }),
 			// The CLI displays a sanitized error after reading the stream.
 			onError: (): void => {},
 		});
@@ -37,20 +37,42 @@ export async function runAgent(
 					throw part.error;
 				case "abort":
 					throw new Error("模型请求已取消。");
+				case "text-start":
+				case "text-end":
+				case "reasoning-start":
+				case "reasoning-end":
+				case "reasoning-delta":
+				case "tool-input-start":
+				case "tool-input-end":
+				case "tool-input-delta":
+				case "source":
+				case "file":
+				case "tool-call":
+				case "tool-result":
+				case "tool-error":
+				case "start-step":
+				case "finish-step":
+				case "start":
+				case "finish":
+				case "raw":
+					break;
 			}
 		}
 
 		const [text, usage] = await Promise.all([result.text, result.usage]);
-		if (text.trim()) {
+		if (text.trim() !== "") {
 			return { text, usage };
 		}
 	} catch (error) {
-		if (abortSignal?.aborted) {
+		if (abortSignal?.aborted === true) {
 			throw new Error("模型请求已取消。", { cause: error });
 		}
-		if (APICallError.isInstance(error) && error.statusCode) {
-			throw new Error(`网关请求失败（HTTP ${String(error.statusCode)}）。`, { cause: error });
+
+		const statusCode = APICallError.isInstance(error) ? error.statusCode : undefined;
+		if (statusCode !== undefined && statusCode > 0) {
+			throw new Error(`网关请求失败（HTTP ${String(statusCode)}）。`, { cause: error });
 		}
+
 		throw new Error("模型请求失败，请检查网关地址、连接和模型配置。", { cause: error });
 	}
 

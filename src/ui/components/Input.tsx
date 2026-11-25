@@ -20,14 +20,17 @@ export function Input({ onSubmit, disabled }: IInputProps): ReactElement | undef
 	}
 
 	useInput((input, key): void => {
-		if (disabled) return;
+		if (disabled) {
+			return;
+		}
 
 		const { value, cursor } = latestDraft.current;
 		if (key.return || input === "\n") {
-			if (value.trim()) {
+			if (value.trim() !== "") {
 				update("", 0);
 				onSubmit(value);
 			}
+
 			return;
 		}
 
@@ -48,7 +51,7 @@ export function Input({ onSubmit, disabled }: IInputProps): ReactElement | undef
 		} else if (key.backspace || key.delete) {
 			// Ink 6 reports Backspace as Delete in terminals that send DEL.
 			update(value.slice(0, previous) + value.slice(cursor), previous);
-		} else if (input && !key.ctrl && !key.meta && !key.tab) {
+		} else if (input !== "" && !key.ctrl && !key.meta && !key.tab) {
 			const text = input.replace(/\r\n?/g, "\n");
 			const updated = value.slice(0, cursor) + text + value.slice(cursor);
 			const insertionEnd = cursor + text.length;
@@ -59,7 +62,9 @@ export function Input({ onSubmit, disabled }: IInputProps): ReactElement | undef
 		}
 	});
 
-	if (disabled) return undefined;
+	if (disabled) {
+		return undefined;
+	}
 
 	const { value, cursor } = draft;
 	const current = segmenter.segment(value).containing(cursor)?.segment ?? "";
@@ -70,7 +75,7 @@ export function Input({ onSubmit, disabled }: IInputProps): ReactElement | undef
 			</Text>
 			<Text>
 				{value.slice(0, cursor)}
-				<Text inverse>{current || " "}</Text>
+				<Text inverse>{current === "" ? " " : current}</Text>
 				{value.slice(cursor + current.length)}
 			</Text>
 		</Box>
