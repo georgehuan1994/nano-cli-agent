@@ -1,5 +1,12 @@
 import { createOpenAI, type OpenAIProvider } from "@ai-sdk/openai";
-import { APICallError, type LanguageModelUsage, type ModelMessage, streamText, type StreamTextResult } from "ai";
+import {
+	APICallError,
+	type LanguageModelUsage,
+	type ModelMessage,
+	stepCountIs,
+	streamText,
+	type StreamTextResult,
+} from "ai";
 
 import type { IOpenAIConfig, ITokenUsageInfo } from "../types.js";
 import { SYSTEM_PROMPT } from "./system/prompt.js";
@@ -43,6 +50,7 @@ export async function runAgent(
 			system: SYSTEM_PROMPT,
 			messages,
 			tools,
+			stopWhen: stepCountIs(2),
 			...(abortSignal === undefined ? {} : { abortSignal }),
 			// The CLI displays a sanitized error after reading the stream.
 			onError: (): void => {},
@@ -79,7 +87,7 @@ export async function runAgent(
 			}
 		}
 
-		const [text, usage]: [string, LanguageModelUsage] = await Promise.all([result.text, result.usage]);
+		const [text, usage]: [string, LanguageModelUsage] = await Promise.all([result.text, result.totalUsage]);
 		if (text.trim() !== "") {
 			return { text, usage };
 		}
